@@ -105,3 +105,66 @@ n 天内完成所有训练，即每一项科目训练的最后一天都要满足
 
 
 */
+
+//使用两个数组，一个存放最早，一个存放最晚
+//一边输入一边计算最早情况，当完成需要时间超出n，直接输出
+//最晚情况就是倒着算，使用n倒着计算每个科目的最晚开始时间，遇到被多次依赖的科目，
+//取最小的开始时间
+
+#include<vector>
+#include<iostream>
+using namespace std;
+
+int main(){
+    int n,m;
+    cin>> n >> m;
+    vector<int> dep_id(m+1,0);
+    vector<int> dep_days(m+1,0);
+    vector<int> early(m+1,1);
+    early[0]=0;
+    vector<int> last(m+1,n);
+    for(int i=1;i<=m;i++){
+        //读取dep_id
+        int id;
+        cin >> id;
+        dep_id[i]= id;
+    }
+    for(int i=1;i<=m;i++){
+        //读取dep_days
+        int days;
+        cin >> days;
+        dep_days[i]= days;
+    }
+    bool ok = true; //记录一个是否可以完成
+    //计算最早开始时间
+    for(int i=1;i<=m;i++){
+        early[i] = early[dep_id[i]] + dep_days[dep_id[i]];
+        if(dep_id[i]==0) early[i]=1;
+        if(early[i]+dep_days[i] -1>n){
+            ok = false; //不能够在规定时间完成
+        }
+        cout<< early[i] << " ";
+    }
+    cout<< endl;
+    if(!ok){
+        return 0;
+    }
+    //能够完成任务就需要进行一波计算最晚开始时间
+    //一开始就是最晚时间，然后受依赖项提前，小值更新
+    for(int i=m;i>=1;i--){
+        //先更新自身
+        if(n-dep_days[i]<last[i]){
+            last[i]= n - dep_days[i] + 1;
+        }
+        if(dep_id[i]!=0){
+            //通过它来更新被依赖项
+            if(last[i] - dep_days[dep_id[i]] < last[dep_id[i]]){
+                last[dep_id[i]] = last[i] - dep_days[dep_id[i]];
+            }
+        }
+    }
+    for(int i=1;i<=m;i++){
+        cout<<last[i]<< " ";
+    }
+    return 0;
+}
